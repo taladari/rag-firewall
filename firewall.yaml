@@ -1,0 +1,19 @@
+scanners:
+  - type: regex_injection
+  - type: pii
+  - type: secrets
+  - type: encoded
+  - type: url
+    allowlist: ["docs.myco.com", "intranet.myco.local"]
+    denylist: ["evil.example.com"]
+  - type: conflict
+    stale_days: 120
+
+policies:
+  - name: block_high_sensitivity
+    match: { metadata.sensitivity: "high" }
+    action: deny
+
+  - name: prefer_recent_versions
+    action: rerank
+    weight: { recency: 0.6, relevance: 0.4 }

@@ -1,0 +1,24 @@
+name: docker
+on: { push: { tags: ["v*"] } }
+permissions: { contents: read, packages: write }
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: ${{ github.actor }}, password: ${{ secrets.GITHUB_TOKEN }} }
+      - name: Extract tag version
+        id: ver
+        run: |
+          REF=${GITHUB_REF#refs/tags/}
+          echo "tag=${REF}" >> $GITHUB_OUTPUT
+          echo "ver=${REF#v}" >> $GITHUB_OUTPUT
+      - name: Build image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository_owner }}/rag-firewall:${{ steps.ver.outputs.ver }}
+          docker build -t "$IMAGE" -t ghcr.io/${{ github.repository_owner }}/rag-firewall:latest .
+      - name: Push image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/rag-firewall:${{ steps.ver.outputs.ver }}
+          docker push ghcr.io/${{ github.repository_owner }}/rag-firewall:latest

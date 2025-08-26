@@ -1,0 +1,2 @@
+[console_scripts]
+ragfw = rag_firewall.cli:main
