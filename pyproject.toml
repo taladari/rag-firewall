@@ -1,15 +1,23 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "rag-firewall"
-version = "0.1.0
-description = "Retrieval-time trust layer for RAG."
-readme = "README.md"
+version = "0.1.0"
+description = "Retrieval-time trust layer for RAG: poisoning detection, policies, provenance, and audit."
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.9"
-authors = [{name="RAG Firewall Maintainers"}]
-dependencies = ["pyyaml>=6.0","regex>=2023.10.3"]
+authors = [{ name = "RAG Firewall Maintainers" }]
+license = { text = "Apache-2.0" }
+dependencies = [
+  "pyyaml>=6.0",
+  "regex>=2023.10.3"
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/rag-firewall"
+Repository = "https://github.com/your-org/rag-firewall"
 
 [project.scripts]
 ragfw = "rag_firewall.cli:main"
