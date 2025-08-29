@@ -1,9 +1,15 @@
 # RAG Integrity Firewall
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/taladari/rag-firewall?style=social)](https://github.com/taladari/rag-firewall/stargazers)
+[![PyPI version](https://img.shields.io/pypi/v/rag-firewall)](https://pypi.org/project/rag-firewall/)
+[![PyPI Downloads](https://pepy.tech/badge/rag-firewall)](https://pepy.tech/project/rag-firewall)
+[![License](https://img.shields.io/github/license/taladari/rag-firewall)](LICENSE)
+
 RAG Integrity Firewall is a lightweight, client-side security layer for retrieval-augmented generation (RAG) systems.  
 It scans retrieved chunks before they reach your LLM, blocks high-risk inputs such as prompt injection and secret leaks, and applies policies to down-rank stale or untrusted content.  
 
 See the [ROADMAP.md](ROADMAP.md) for planned enhancements and upcoming enterprise features. 
+
 
 ---
 
