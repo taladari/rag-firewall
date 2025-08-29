@@ -39,20 +39,52 @@ pip install -e .
 
 ## Quickstart
 
-Wrap any retriever with the firewall:
+Wrap any retriever with the firewall.
+
+### LangChain example
 
 ```python
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
 from rag_firewall import Firewall, wrap_retriever
 
+# Create your base retriever
+vectorstore = FAISS.load_local("faiss_index", OpenAIEmbeddings())
+base_retriever = vectorstore.as_retriever()
+
+# Load firewall and wrap retriever
 fw = Firewall.from_yaml("firewall.yaml")
 safe = wrap_retriever(base_retriever, firewall=fw)
 
 docs = safe.get_relevant_documents("What is our mission?")
 for d in docs:
-    print(d["metadata"]["_ragfw"])
+    print(d.metadata["_ragfw"])
+```
+
+### LlamaIndex example
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from rag_firewall import Firewall, wrap_retriever
+
+# Create your base retriever
+documents = SimpleDirectoryReader("docs").load_data()
+index = VectorStoreIndex.from_documents(documents)
+base_retriever = index.as_retriever()
+
+# Load firewall and wrap retriever
+fw = Firewall.from_yaml("firewall.yaml")
+safe = wrap_retriever(base_retriever, firewall=fw)
+
+docs = safe.retrieve("What is our mission?")
+for d in docs:
+    print(d.metadata["_ragfw"])
 ```
 
 Audit logs are written to `audit.jsonl`.
+
+> For a full pipeline example with Chroma, OpenAI embeddings, and RetrievalQA, see [examples/langchain_example.py](examples/langchain_example.py).
+> For a barebones example with a custom retriever, see [examples/custom_retriever.py](examples/custom_retriever.py).
 
 ---
 
