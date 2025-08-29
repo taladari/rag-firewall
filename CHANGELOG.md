@@ -20,3 +20,10 @@
 
 ## [0.1.0] - Removed
 - Yanked (internal testing only, not a public release)
+
+---
+
+## [0.3.1] - 2025-08-29
+### Changed
+- Added SPDX headers and NOTICE to all source files.
+- No functional changes vs 0.3.0.
