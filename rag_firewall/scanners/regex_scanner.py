@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import regex as re
 DEFAULT_PATTERNS=[r"(?i)ignore (all|previous) instructions", r"(?i)reveal (the )?system prompt", r"(?i)disregard all rules"]
 class RegexInjectionScanner:

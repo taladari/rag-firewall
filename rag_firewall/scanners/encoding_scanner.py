@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import regex as re
 BASE64_RE=re.compile(r"(?:[A-Za-z0-9+/]{40,}={0,2})")
 def _base64_ratio(text):

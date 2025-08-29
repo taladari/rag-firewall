@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 """LangChain integration shims for RAG Firewall.
 
 Provides a drop-in retriever that wraps any LangChain retriever.

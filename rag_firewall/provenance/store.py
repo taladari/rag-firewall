@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import sqlite3, time
 class ProvenanceStore:
     def __init__(self, path='prov.sqlite'):

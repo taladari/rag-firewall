@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import time
 from .audit import Audit
 from .policies.engine import PolicyEngine

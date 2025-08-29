@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import regex as re
 PATTERNS=[(r"AKIA[0-9A-Z]{16}","aws_access_key"),(r"ASIA[0-9A-Z]{16}","aws_temp_key"),
 (r"(?i)aws(.{0,20})?(secret|key|access).{0,5}[:=].{0,2}[A-Za-z0-9/+=]{32,}","aws_secret_suspect"),

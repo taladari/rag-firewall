@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import time
 STALE_DAYS_DEFAULT=180
 class ConflictScanner:

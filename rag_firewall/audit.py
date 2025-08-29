@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import json, os
 _LOG_PATH = os.environ.get("RAGFW_AUDIT_LOG","audit.jsonl")
 class Audit:

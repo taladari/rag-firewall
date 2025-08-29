@@ -207,3 +207,7 @@ Patterns and policies will evolve. Contributions and red-team tests are welcome.
 - Contribute scanners, policy examples, or framework adapters via pull requests.  
 
 For organizations interested in enterprise features (dashboard, centralized audit, compliance mapping), please reach out to discuss early access.
+
+---
+
+RAG Integrity Firewall is a trademark of Tal Adari. All rights reserved.

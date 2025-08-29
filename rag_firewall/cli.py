@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import argparse, os, glob
 from rag_firewall import Firewall
 from rag_firewall.provenance import Hasher, ProvenanceStore

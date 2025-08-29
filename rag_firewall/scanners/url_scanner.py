@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2025 Tal Adari
+
 import regex as re
 from urllib.parse import urlparse
 URL_RE=re.compile(r"https?://[\w\-\.:%#@/\?=~\+,&]+", re.I)
