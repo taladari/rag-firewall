@@ -194,7 +194,7 @@ Expected outcome:
 
 ## Status
 
-Beta release (v0.1.0).  
+Beta release (v0.3.1).  
 Patterns and policies will evolve. Contributions and red-team tests are welcome.
 
 ---
