@@ -1,9 +1,23 @@
 # RAG Integrity Firewall
 
-A retrieval-time trust layer for RAG systems.  
-The firewall scans chunks before they reach your LLM, detects and blocks risks such as prompt injection or secret leaks, enforces policies, and re-ranks content by trustworthiness.  
+RAG Integrity Firewall is a lightweight, client-side security layer for retrieval-augmented generation (RAG) systems.  
+It scans retrieved chunks before they reach your LLM, blocks high-risk inputs such as prompt injection and secret leaks, and applies policies to down-rank stale or untrusted content.  
 
-It runs entirely client-side: no data leaves your environment.
+See the [ROADMAP.md](ROADMAP.md) for planned enhancements and upcoming enterprise features. 
+
+---
+
+## Who is this for?
+
+- **Teams building RAG/LLM applications** who want to reduce risk before adoption.
+- **Platform engineers** adding guardrails without rewriting their pipelines.
+- **Security-conscious organizations** (finance, government, healthcare) where data must stay inside.
+
+## What this is not
+
+- Not a SaaS or cloud service — the firewall runs **entirely client-side**, no data leaves your environment.
+- Not an LLM output filter — it focuses on retrieval-time risks, not response moderation.
+- Not a silver bullet — it complements other security layers like authentication, RBAC, and output review.
 
 ---
 
@@ -150,3 +164,14 @@ Patterns and policies will evolve. Contributions and red-team tests are welcome.
 ## License
 
 [Apache 2.0](LICENSE)
+
+---
+
+## Next Steps
+
+- Read the [ROADMAP](ROADMAP.md) to see planned features and enterprise enhancements.  
+- Check the [examples](examples/) folder for quick integration demos.  
+- File issues or feature requests in [GitHub Issues](https://github.com/taladari/rag-firewall/issues).  
+- Contribute scanners, policy examples, or framework adapters via pull requests.  
+
+For organizations interested in enterprise features (dashboard, centralized audit, compliance mapping), please reach out to discuss early access.
