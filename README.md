@@ -156,6 +156,16 @@ policies:
 
 ---
 
+## Knowledge Graphs (beta)
+
+RAG Firewall can sanitize **knowledge-graph retrieval** (nodes/edges/paths) before prompt assembly.
+
+Install extras:
+```bash
+pip install 'rag-firewall[graph]'
+
+---
+
 ## 10-minute evaluation
 
 Create a test folder with some documents:

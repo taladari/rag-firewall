@@ -41,10 +41,12 @@ def build_firewall():
             ConflictScanner(stale_days=365),
         ],
         policies=[
-            {"name": "block_secrets", "match": {}, "action": "deny"},
+            {"name": "deny_secrets", "match": {"findings.scanner": "secrets"}, "action": "deny"},
+            {"name": "deny_high_severity", "match": {"findings.severity": "high"}, "action": "deny"},
+            {"name": "block_denylisted_urls", "match": {"findings.url.reason": "denylist_domain"}, "action": "deny"},
             {"name": "prefer_recent", "action": "rerank", "weight": {"recency": 0.6, "relevance": 0.4}},
             {"name": "allow_default", "action": "allow"},
-        ],
+        ]
     )
     return fw
 
@@ -70,3 +72,9 @@ if __name__ == "__main__":
     if docs:
         print(docs[0]["page_content"])
         print(docs[0]["metadata"].get("_ragfw"))
+
+    from rag_firewall.audit import Audit
+
+    print("\nAudit tail:")
+    for ev in Audit.tail(10):
+        print(ev)

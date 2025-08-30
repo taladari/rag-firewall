@@ -48,12 +48,22 @@ class Firewall:
         return findings
 
     def decide(self, doc, base_score=1.0, context=None):
-        context=context or {}
-        findings=self.scan(doc)
-        decision=self.policy_engine.evaluate(doc, findings, context, base_score)
+        context = context or {}
+        findings = self.scan(doc)
+
+        # NEW: enrich metadata with easy-to-match flags
+        has_secrets = any(f.get("scanner") == "secrets" for f in findings)
+        has_high_findings = any(f.get("severity") == "high" for f in findings)
+        md = doc.get("metadata", {}) or {}
+        md["has_secrets"] = has_secrets
+        md["has_high_findings"] = has_high_findings
+        doc["metadata"] = md
+
+        decision = self.policy_engine.evaluate(doc, findings, context, base_score)
+
         Audit.log(AuditEvent(
             ts=time.time(),
-            chunk_hash=doc.get("metadata", {}).get("hash"),  # <- same as before
+            chunk_hash=doc.get("metadata", {}).get("hash"),
             decision=decision.get("action", "allow"),
             score=decision.get("score", base_score),
             reasons=decision.get("reasons", []),

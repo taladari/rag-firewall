@@ -1,24 +1,13 @@
-scanners:
-  - type: secrets
-  - type: pii
-  - type: url
-    allowlist: ["intranet.acme.local", "docs.acme.com"]
-    denylist: ["evil.example.com"]
-  - type: encoded
-  - type: conflict
-    stale_days: 365
-
-graph:
-  schema:
-    text_fields:
-      Person: ["bio"]
-      Meeting: ["summary", "minutes"]
-      Note: ["text"]
-
 policies:
-  - name: deny_secrets_anywhere
-    match: {}
+  # NEW: drop any artifact with high-severity findings (e.g., secrets, injection)
+  - name: deny_high_severity_findings
+    match: { findings.severity: "high" }
     action: deny
+
+  # (Optional) explicit secrets rule if you prefer it specific
+  # - name: deny_secrets
+  #   match: { findings.scanner: "secrets" }
+  #   action: deny
 
   - name: block_denylisted_urls
     match: { findings.url.reason: "denylist_domain" }
@@ -29,3 +18,6 @@ policies:
     weight:
       recency: 0.6
       relevance: 0.4
+
+  - name: allow_default
+    action: allow
