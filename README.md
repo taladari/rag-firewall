@@ -192,6 +192,43 @@ Expected outcome:
 
 ---
 
+## FAQ
+
+**Q: How is this different from evaluation tools (Ragas, TruLens, DeepEval, etc.)?**  
+A: Evaluators are for **measurement**: they grade retrieval quality and LLM outputs. RAG Firewall is **runtime enforcement**: it blocks or reranks risky chunks *before* the LLM ever sees them. Evaluators and firewalls are complementary—one monitors, the other enforces.
+
+---
+
+**Q: Why enforce at retrieval time instead of ingest time?**  
+A: Ingest-time filtering is useful, but not enough. Retrieval-time is when you have **full context**—the user’s query, recency requirements, sensitivity tags, and source trust. A chunk that was safe at ingest may become unsafe later (e.g., outdated, denylisted domain, or triggered injection).
+
+---
+
+**Q: Isn’t this just output guardrails?**  
+A: No. Guardrails filter **after** the LLM generates a response. By then, risky input has already influenced the model. RAG Firewall acts **before** the LLM sees the data, preventing bad context from entering the prompt window at all.
+
+---
+
+**Q: What’s the latency overhead?**  
+A: Minimal. Scanners are regex/heuristic-based, with no network calls. For ~5–20 retrieved chunks, overhead is typically in the low milliseconds.
+
+---
+
+**Q: Does any data leave my environment?**  
+A: No. The firewall is entirely client-side. All scanning, enforcement, and auditing happen locally—no SaaS, no data transfer.
+
+---
+
+**Q: Couldn’t I just write my own filters?**  
+A: You could, but you’d need to maintain patterns for prompt injections, secrets, PII, URLs, encoded blobs, stale/conflicting chunks, plus a policy engine and audit logging. RAG Firewall packages these into one composable layer with ready-to-use integrations.
+
+---
+
+**Q: How do I test it quickly?**  
+A: Use the [10-minute evaluation](#10-minute-evaluation) in the README. It sets up demo docs (`mission.txt`, `poison.txt`, `secrets.txt`, `url.txt`) so you can see the firewall deny injections/secrets, flag URLs, and allow mission-critical content.
+
+---
+
 ## Status
 
 Beta release (v0.3.1).  
