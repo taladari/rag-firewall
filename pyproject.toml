@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rag-firewall"
-version = "0.3.1"
+version = "0.4.0"
 description = "Client-side retrieval firewall for RAG systems — blocks prompt injection and secret leaks, re-ranks stale or untrusted content, and keeps all data inside your environment."
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.9"
