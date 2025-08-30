@@ -70,16 +70,18 @@ class Firewall:
             findings=findings,
             policy=decision.get("policy"),
         ))
-        return decision
+
+        return decision, findings
 
     def evaluate_one(self, doc, base_score: float = 1.0, context: dict | None = None):
-        dec = self.decide(doc, base_score=base_score, context=context)
+        dec, findings = self.decide(doc, base_score=base_score, context=context)
         md = doc.get("metadata", {}) or {}
         md["_ragfw"] = {
             "decision": dec.get("action", "allow"),
             "score": dec.get("score", 1.0),
             "reasons": dec.get("reasons", []),
             "policy": dec.get("policy"),
+            "findings": findings
         }
         doc["metadata"] = md
         return doc
@@ -102,7 +104,7 @@ class _RetrieverWrapper:
             if out["metadata"]["_ragfw"]["decision"] == "deny":
                 continue
             safe.append(out)
-        safe.sort(key=lambda x: x["metadata"]["_ragfw"].get("score", 1.0), reverse=True)
+        safe.sort(key=lambda x: x.get("metadata", {}).get("_ragfw", {}).get("score", 1.0), reverse=True)
         return safe
 
 def wrap_retriever(retriever, firewall, provenance_store=None):

@@ -44,7 +44,7 @@ class TrustyRetriever(LIBaseRetriever):
                     text = getattr(node, "text", None)
                 md = getattr(node, "metadata", {}) or {}
             payload = {"page_content": text, "metadata": md}
-            dec = self.firewall.decide(payload, base_score=getattr(r, "score", 1.0) or 1.0, context={"query": query})
+            dec, findings = self.firewall.decide(payload, base_score=getattr(r, "score", 1.0) or 1.0, context={"query": query})
             if dec.get("action") == "deny":
                 continue
             md["_ragfw"] = {"decision": dec.get("action"), "score": dec.get("score", 1.0), "reasons": dec.get("reasons", []), "policy": dec.get("policy")}

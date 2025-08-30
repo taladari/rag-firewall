@@ -26,7 +26,7 @@ def cmd_query(args):
         except Exception: pass
     safe=[]
     for d in docs:
-        dec=fw.decide(d, base_score=1.0, context={'query':args.query})
+        dec, findings = fw.decide(d, base_score=1.0, context={'query':args.query})
         if dec.get('action')!='deny': safe.append(d)
         if args.show_decisions: print(dec)
     print(f'Safe docs: {len(safe)} / {len(docs)}')
