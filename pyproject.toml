@@ -15,6 +15,15 @@ dependencies = [
   "regex>=2023.10.3"
 ]
 
+[project.optional-dependencies]
+graph = [
+  "networkx>=3.2"
+]
+dev = [
+  "pytest>=7.4",
+  "networkx>=3.2"
+]
+
 [project.urls]
 Homepage = "https://github.com/taladari/rag-firewall"
 Repository = "https://github.com/taladari/rag-firewall"

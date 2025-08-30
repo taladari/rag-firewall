@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Tal Adari
 
 import time
-from .audit import Audit
+from .audit import Audit, AuditEvent
 from .policies.engine import PolicyEngine
 try:
     import yaml
@@ -51,23 +51,48 @@ class Firewall:
         context=context or {}
         findings=self.scan(doc)
         decision=self.policy_engine.evaluate(doc, findings, context, base_score)
-        Audit.log({"ts":time.time(),"chunk_hash":doc.get("metadata",{}).get("hash"),
-                   "decision":decision.get("action","allow"),"score":decision.get("score",base_score),
-                   "reasons":decision.get("reasons",[]),"findings":findings,"policy":decision.get("policy")})
+        Audit.log(AuditEvent(
+            ts=time.time(),
+            chunk_hash=doc.get("metadata", {}).get("hash"),  # <- same as before
+            decision=decision.get("action", "allow"),
+            score=decision.get("score", base_score),
+            reasons=decision.get("reasons", []),
+            findings=findings,
+            policy=decision.get("policy"),
+        ))
         return decision
+
+    def evaluate_one(self, doc, base_score: float = 1.0, context: dict | None = None):
+        dec = self.decide(doc, base_score=base_score, context=context)
+        md = doc.get("metadata", {}) or {}
+        md["_ragfw"] = {
+            "decision": dec.get("action", "allow"),
+            "score": dec.get("score", 1.0),
+            "reasons": dec.get("reasons", []),
+            "policy": dec.get("policy"),
+        }
+        doc["metadata"] = md
+        return doc
+
+    def evaluate(self, docs: list[dict], base_score: float = 1.0, context: dict | None = None) -> list[dict]:
+        out = []
+        for d in docs:
+            out.append(self.evaluate_one(d, base_score=base_score, context=context))
+        return out
 
 class _RetrieverWrapper:
     def __init__(self, retriever, firewall, provenance_store=None):
         self._inner=retriever; self.firewall=firewall; self.provenance=provenance_store
+
     def get_relevant_documents(self, query):
-        docs=self._inner.get_relevant_documents(query)
-        safe=[]
+        docs = self._inner.get_relevant_documents(query)
+        safe = []
         for d in docs:
-            dec=self.firewall.decide(d, base_score=1.0, context={"query":query})
-            if dec.get("action")=="deny": continue
-            md=d.get("metadata",{}); md["_ragfw"]={"decision":dec.get("action"),"score":dec.get("score",1.0),"reasons":dec.get("reasons",[]),"policy":dec.get("policy")}
-            d["metadata"]=md; safe.append(d)
-        safe.sort(key=lambda x: x.get("metadata",{}).get("_ragfw",{}).get("score",1.0), reverse=True)
+            out = self.firewall.evaluate_one(d, base_score=1.0, context={"query": query})
+            if out["metadata"]["_ragfw"]["decision"] == "deny":
+                continue
+            safe.append(out)
+        safe.sort(key=lambda x: x["metadata"]["_ragfw"].get("score", 1.0), reverse=True)
         return safe
 
 def wrap_retriever(retriever, firewall, provenance_store=None):
