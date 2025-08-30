@@ -1,0 +1,23 @@
+policies:
+  # NEW: drop any artifact with high-severity findings (e.g., secrets, injection)
+  - name: deny_high_severity_findings
+    match: { findings.severity: "high" }
+    action: deny
+
+  # (Optional) explicit secrets rule if you prefer it specific
+  # - name: deny_secrets
+  #   match: { findings.scanner: "secrets" }
+  #   action: deny
+
+  - name: block_denylisted_urls
+    match: { findings.url.reason: "denylist_domain" }
+    action: deny
+
+  - name: prefer_recent
+    action: rerank
+    weight:
+      recency: 0.6
+      relevance: 0.4
+
+  - name: allow_default
+    action: allow

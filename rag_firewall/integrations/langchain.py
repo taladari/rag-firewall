@@ -41,7 +41,7 @@ class FirewallRetriever(BaseRetriever):
         for d in docs:
             # LangChain Document has .page_content/.metadata
             payload = {"page_content": getattr(d, "page_content", None), "metadata": getattr(d, "metadata", {})}
-            dec = self.firewall.decide(payload, base_score=1.0, context={"query": query})
+            dec, findings = self.firewall.decide(payload, base_score=1.0, context={"query": query})
             if dec.get("action") == "deny":
                 continue
             md = payload["metadata"]

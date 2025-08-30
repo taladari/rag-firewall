@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Tal Adari
 
 import time
-from .audit import Audit
+from .audit import Audit, AuditEvent
 from .policies.engine import PolicyEngine
 try:
     import yaml
@@ -48,26 +48,63 @@ class Firewall:
         return findings
 
     def decide(self, doc, base_score=1.0, context=None):
-        context=context or {}
-        findings=self.scan(doc)
-        decision=self.policy_engine.evaluate(doc, findings, context, base_score)
-        Audit.log({"ts":time.time(),"chunk_hash":doc.get("metadata",{}).get("hash"),
-                   "decision":decision.get("action","allow"),"score":decision.get("score",base_score),
-                   "reasons":decision.get("reasons",[]),"findings":findings,"policy":decision.get("policy")})
-        return decision
+        context = context or {}
+        findings = self.scan(doc)
+
+        # NEW: enrich metadata with easy-to-match flags
+        has_secrets = any(f.get("scanner") == "secrets" for f in findings)
+        has_high_findings = any(f.get("severity") == "high" for f in findings)
+        md = doc.get("metadata", {}) or {}
+        md["has_secrets"] = has_secrets
+        md["has_high_findings"] = has_high_findings
+        doc["metadata"] = md
+
+        decision = self.policy_engine.evaluate(doc, findings, context, base_score)
+
+        Audit.log(AuditEvent(
+            ts=time.time(),
+            chunk_hash=doc.get("metadata", {}).get("hash"),
+            decision=decision.get("action", "allow"),
+            score=decision.get("score", base_score),
+            reasons=decision.get("reasons", []),
+            findings=findings,
+            policy=decision.get("policy"),
+        ))
+
+        return decision, findings
+
+    def evaluate_one(self, doc, base_score: float = 1.0, context: dict | None = None):
+        dec, findings = self.decide(doc, base_score=base_score, context=context)
+        md = doc.get("metadata", {}) or {}
+        md["_ragfw"] = {
+            "decision": dec.get("action", "allow"),
+            "score": dec.get("score", 1.0),
+            "reasons": dec.get("reasons", []),
+            "policy": dec.get("policy"),
+            "findings": findings
+        }
+        doc["metadata"] = md
+        return doc
+
+    def evaluate(self, docs: list[dict], base_score: float = 1.0, context: dict | None = None) -> list[dict]:
+        out = []
+        for d in docs:
+            out.append(self.evaluate_one(d, base_score=base_score, context=context))
+        return out
 
 class _RetrieverWrapper:
     def __init__(self, retriever, firewall, provenance_store=None):
         self._inner=retriever; self.firewall=firewall; self.provenance=provenance_store
+
     def get_relevant_documents(self, query):
-        docs=self._inner.get_relevant_documents(query)
-        safe=[]
+        docs = self._inner.get_relevant_documents(query)
+        safe = []
         for d in docs:
-            dec=self.firewall.decide(d, base_score=1.0, context={"query":query})
-            if dec.get("action")=="deny": continue
-            md=d.get("metadata",{}); md["_ragfw"]={"decision":dec.get("action"),"score":dec.get("score",1.0),"reasons":dec.get("reasons",[]),"policy":dec.get("policy")}
-            d["metadata"]=md; safe.append(d)
-        safe.sort(key=lambda x: x.get("metadata",{}).get("_ragfw",{}).get("score",1.0), reverse=True)
+            out = self.firewall.evaluate_one(d, base_score=1.0, context={"query": query})
+            if out["metadata"]["_ragfw"]["decision"] == "deny":
+                continue
+            safe.append(out)
+        safe.sort(key=lambda x: x.get("metadata", {}).get("_ragfw", {}).get("score", 1.0), reverse=True)
         return safe
 
 def wrap_retriever(retriever, firewall, provenance_store=None):

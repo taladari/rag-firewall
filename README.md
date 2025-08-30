@@ -87,6 +87,47 @@ for d in docs:
     print(d.metadata["_ragfw"])
 ```
 
+### GraphRAG Example (NetworkX)
+
+RAG Firewall also supports **graph-based retrieval pipelines** (e.g., NetworkX, Neo4j).  
+You can sanitize nodes/edges before turning them into LLM context.
+
+```python
+from rag_firewall import Firewall
+from rag_firewall.graph.wrapper import FirewallGraph
+from rag_firewall.integrations.graph.networkx_adapter import NetworkXAdapter
+import networkx as nx
+
+# Build toy graph
+G = nx.MultiDiGraph()
+G.add_node("m1", label="Meeting", summary="API redesign discussion", minutes="Decision: adopt plan A.")
+G.add_node("n1", label="Note", text="AWS key AKIAABCDEFGHIJKLMNOP")
+G.add_edge("m1", "n1", key="r3", type="has_note")
+
+# Wrap with firewall
+adapter = NetworkXAdapter(G)
+sg = adapter.retrieve(query="Meeting", radius=1)
+
+fw = Firewall.from_yaml("firewall.graph.yaml")
+fg = FirewallGraph(firewall=fw, schema={
+    "text_fields": {
+        "Meeting": ["summary", "minutes"],
+        "Note": ["text"]
+    }
+})
+
+sanitized = fg.sanitize(sg)
+docs = fg.to_documents(sanitized)
+print("Nodes kept:", list(sanitized.nodes.keys()))
+print("Edges kept:", list(sanitized.edges.keys()))
+print("--- Serialized docs (first 1) ---")
+if docs:
+    print(docs[0]["page_content"])
+    print(docs[0]["metadata"].get("_ragfw"))
+```
+
+See [examples/graph_example.py](examples/graph_example.py) for a full runnable demo.
+
 Audit logs are written to `audit.jsonl`.
 
 > For a full pipeline example with Chroma, OpenAI embeddings, and RetrievalQA, see [examples/langchain_example.py](examples/langchain_example.py).
@@ -153,6 +194,16 @@ policies:
 - **CLI**  
   - `ragfw index` — hash and record documents  
   - `ragfw query` — query a folder with firewall checks  
+
+---
+
+## Knowledge Graphs (beta)
+
+RAG Firewall can sanitize **knowledge-graph retrieval** (nodes/edges/paths) before prompt assembly.
+
+Install extras:
+```bash
+pip install 'rag-firewall[graph]'
 
 ---
 
