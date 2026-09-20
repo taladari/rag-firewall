@@ -8,6 +8,7 @@ scanners:
     denylist: ["evil.example.com"]
   - type: conflict
     stale_days: 120
+  - type: sql_injection
 
 policies:
   - name: block_high_sensitivity

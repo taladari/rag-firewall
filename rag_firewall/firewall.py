@@ -45,6 +45,7 @@ class Firewall:
         from .scanners.encoding_scanner import EncodedContentScanner
         from .scanners.url_scanner import URLScanner
         from .scanners.conflict_scanner import ConflictScanner
+        from .scanners.sql_injection_scanner import SQLInjectionScanner
         for s in cfg.get("scanners",[]):
             t=s.get("type")
             if t=="regex_injection": scanners.append(RegexInjectionScanner(patterns=s.get("patterns")))
@@ -54,6 +55,7 @@ class Firewall:
             elif t=="encoded": scanners.append(EncodedContentScanner(min_len=s.get("min_len",200), ratio_threshold=s.get("ratio_threshold",0.35)))
             elif t=="url": scanners.append(URLScanner(allowlist=s.get("allowlist"), denylist=s.get("denylist")))
             elif t=="conflict": scanners.append(ConflictScanner(stale_days=s.get("stale_days",180)))
+            elif t=="sql_injection": scanners.append(SQLInjectionScanner(extra_patterns=s.get("extra_patterns")))
         policies=cfg.get("policies",[])
         return cls(scanners=scanners, policies=policies)
 

@@ -6,6 +6,7 @@ from rag_firewall.scanners.secrets_scanner import SecretsScanner
 from rag_firewall.scanners.encoding_scanner import EncodedContentScanner
 from rag_firewall.scanners.url_scanner import URLScanner
 from rag_firewall.scanners.conflict_scanner import ConflictScanner
+from rag_firewall.scanners.sql_injection_scanner import SQLInjectionScanner
 
 
 def test_regex_injection_scanner_flags_common_patterns():
@@ -64,3 +65,40 @@ def test_conflict_scanner_flags_stale_and_deprecated():
     assert any(x["match"] == "stale" for x in f1)
     f2 = s.scan("Deprecated doc", {"deprecated": True})
     assert any(x["match"] == "deprecated" for x in f2)
+
+
+def test_sql_injection_scanner_flags_probe_patterns():
+    s = SQLInjectionScanner()
+    findings = s.scan("' UNION SELECT username, password FROM users--", {})
+    matches = {f["match"] for f in findings}
+    assert "union_select" in matches
+    # probe patterns must be medium severity
+    assert all(f["severity"] == "medium" for f in findings if f["match"] in {"union_select", "comment_strip"})
+
+
+def test_sql_injection_scanner_flags_destructive_patterns():
+    s = SQLInjectionScanner()
+    findings = s.scan("DROP TABLE users; DELETE FROM sessions;--", {})
+    matches = {f["match"] for f in findings}
+    assert "drop_table" in matches
+    assert "delete_from" in matches
+    # destructive patterns must be high severity
+    assert all(
+        f["severity"] == "high"
+        for f in findings
+        if f["match"] in {"drop_table", "delete_from"}
+    )
+
+
+def test_sql_injection_scanner_clean_text_returns_empty():
+    s = SQLInjectionScanner()
+    findings = s.scan("The quarterly earnings report shows a 12% increase in revenue.", {})
+    assert findings == []
+
+
+def test_sql_injection_scanner_extra_patterns():
+    custom = [(r"(?i)\bPG_SLEEP\b", "pg_sleep", "medium")]
+    s = SQLInjectionScanner(extra_patterns=custom)
+    findings = s.scan("SELECT pg_sleep(10);", {})
+    matches = {f["match"] for f in findings}
+    assert "pg_sleep" in matches
